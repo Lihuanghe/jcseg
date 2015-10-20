@@ -1,5 +1,7 @@
 package org.lionsoul.jcseg;
 
+import java.util.HashSet;
+
 import org.lionsoul.jcseg.core.IWord;
 
 
@@ -16,7 +18,7 @@ public class Word implements IWord {
 	private int position;
 	private String pinyin = null;
 	private String[] partspeech = null;
-	private String[] syn = null;
+	private HashSet<String> syn = null;
 	
 	public Word( String value, int type ) {
 		this.value = value;
@@ -88,12 +90,12 @@ public class Word implements IWord {
 	 * @see IWord#getSyn() 
 	 */
 	@Override
-	public String[] getSyn() {
+	public HashSet<String> getSyn() {
 		return syn;
 	}
 
 	@Override
-	public void setSyn(String[] syn) {
+	public void setSyn(HashSet<String> syn) {
 		this.syn = syn;
 	}
 	
@@ -142,16 +144,10 @@ public class Word implements IWord {
 	@Override
 	public void addSyn( String s ) {
 		if ( syn == null ) {
-			syn = new String[1];
-			syn[0] = s;
+			syn = new HashSet<String>();
+			syn.add(s);
 		} else {
-			String[] tycA = syn;
-			syn = new String[syn.length + 1];
-			int j;
-			for ( j = 0; j < tycA.length; j++ )
-				syn[j] = tycA[j];
-			syn[j] = s;
-			tycA = null;
+			syn.add(s);
 		}
 	}
 	
@@ -199,12 +195,14 @@ public class Word implements IWord {
 		sb.append('/');
 		//append the tyc
 		if ( syn != null ) {
-			for ( int j = 0; j < syn.length; j++ ) {
-				if ( j == 0 ) sb.append(syn[j]);
+			int j = 0;
+			for ( String str : syn ) {
+				if ( j == 0 ) sb.append(str);
 				else {
 					sb.append(',');
-					sb.append(syn[j]);
+					sb.append(str);
 				}
+				j++;
 			}
 		} else 
 			sb.append("null");

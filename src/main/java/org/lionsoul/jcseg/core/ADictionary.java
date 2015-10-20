@@ -9,6 +9,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import org.lionsoul.jcseg.filter.ENSCFilter;
 import org.lionsoul.jcseg.util.Util;
@@ -362,41 +364,8 @@ public abstract class ADictionary {
 					}
 					
 					boolean li = ( t == ILexicon.CJK_WORD );
-					
-					//set the syn words.
-					String[] arr = w.getSyn();
-					if ( config.LOAD_CJK_SYN && ! "null".equals(wd[3]) ) {
-						String[] syns = wd[3].split(",");
-						for ( int j = 0; j < syns.length; j++ ) {
-							syns[j] = syns[j].trim();
-							/* Here:
-							 * filter the syn words that its length 
-							 * 		is greater than Config.MAX_LENGTH
-							 */
-							if ( li && syns[j].length() > config.MAX_LENGTH ) continue;
-							/* Here:
-							 * check the syn word is not exists, make sure
-							 * 	the same syn word won't appended. (dictionary reload)
-							 * 
-							 * @date 2013-09-02
-							 */
-							if ( arr != null ) {
-								int length = arr.length;
-								boolean add = true;
-								for ( int i = 0; i < length; i++ )  {
-									if ( syns[j].equals(arr[i]) ) {
-										add = false;
-										break;
-									}
-								}
-								if ( ! add ) continue;
-							}
-							w.addSyn(syns[j]);
-						}
-					}
-					
 					//set the word's part of speech
-					arr = w.getPartSpeech();
+					String[] arr = w.getPartSpeech();
 					if ( config.LOAD_CJK_POS && ! "null".equals(wd[1]) ) {
 						String[] pos = wd[1].split(",");
 						for ( int j = 0; j < pos.length; j++ ) {
@@ -421,6 +390,61 @@ public abstract class ADictionary {
 							w.addPartSpeech(pos[j].trim());
 						}
 					}
+					//set the syn words.
+					
+					if ( config.LOAD_CJK_SYN && ! "null".equals(wd[3]) ) {
+						String[] syns = wd[3].split(",");
+						HashSet<String> tmpset = new HashSet<String>();
+						
+						for ( int j = 0; j < syns.length; j++ ) {
+							syns[j] = syns[j].trim();
+							/* Here:
+							 * filter the syn words that its length 
+							 * 		is greater than Config.MAX_LENGTH
+							 */
+							if ( li && syns[j].length() > config.MAX_LENGTH ) continue;
+							/* Here:
+							 * check the syn word is not exists, make sure
+							 * 	the same syn word won't appended. (dictionary reload)
+							 * 
+							 * @date 2013-09-02
+							 */
+							HashSet<String> set = w.getSyn();
+							if ( set != null ) {
+								boolean add = set.contains(syns[j]);
+								
+								if (  add ) continue;
+							}
+							w.addSyn(syns[j]);
+							//收集同义词列表
+							tmpset.add(w.getValue());
+							tmpset.add(syns[j]);
+							IWord syns_w= dic.get(t, syns[j]);
+							if(syns_w!=null && syns_w.getSyn()!=null){
+								tmpset.addAll(syns_w.getSyn());
+							}
+						}
+						//如果同义词在词库中不存在则自动添加
+						if(w.getSyn()!=null){
+							for(String str : tmpset){
+								if(dic.get(t, str) == null){
+									dic.add(t, str, IWord.T_CJK_WORD);
+								}
+								//同义词相关联
+								
+								
+								for(String addsyn : tmpset){
+									IWord syns_w= dic.get(t, str);
+									if(!syns_w.getValue().equals(addsyn))
+										syns_w.addSyn(addsyn);
+								}
+							}
+
+						}
+
+					}
+					
+	
 				}
 			}
 		} catch (UnsupportedEncodingException e) {

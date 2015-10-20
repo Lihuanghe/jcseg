@@ -1,5 +1,7 @@
 package org.lionsoul.jcseg.core;
 
+import java.util.HashSet;
+
 /**
  * Word interface
  * 
@@ -123,9 +125,9 @@ public interface IWord {
 	 * 
 	 * @return String[]
 	 */
-	public String[] getSyn();
+	public HashSet<String> getSyn();
 	
-	public void setSyn( String[] syn );
+	public void setSyn( HashSet<String> syn );
 	
 	/**
 	 * return the part of speech of the word.

@@ -8,7 +8,10 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.lionsoul.jcseg.Word;
 import org.lionsoul.jcseg.core.IWord;
@@ -96,7 +99,11 @@ public class DicMerge {
 							|| splits[2].equals("null")) )	//pinyin
 						word.setPinyin(splits[2]);
 					if ( ! splits[3].equals("null") )		//synonyms
-						word.setSyn(splits[3].split(","));
+					{
+						HashSet<String> syn = new HashSet<String>();
+						syn.addAll(Arrays.asList(splits[3].split(",")));
+						word.setSyn(syn);
+					}
 					entries.put(splits[0], word);
 				} 
 				else {
@@ -123,11 +130,15 @@ public class DicMerge {
 					if ( ! splits[3].equals("null") ) {
 						String[] syns = splits[3].split(",");
 						if ( word.getSyn() == null )
-							word.setSyn(syns);
+						{
+							HashSet<String> syn = new HashSet<String>();
+							syn.addAll(Arrays.asList(syns));
+							word.setSyn(syn);
+						}
+							
 						else {
-							String[] syn = word.getSyn();
-							for ( int i = 0; i < syns.length; i++ )
-								if ( ! inArray(syn, syns[i]) ) word.addSyn(syns[i]);
+							HashSet<String> syn = word.getSyn();
+							syn.addAll(Arrays.asList(syns));
 						}
 						syns = null;
 					}
@@ -193,14 +204,16 @@ public class DicMerge {
 			if ( word.getSyn() == null )				//synonyms
 				isb.append("null");
 			else {
-				String[] syn = word.getSyn();
-				for ( int i = 0; i < syn.length; i++ ) {
+				HashSet<String> syn = word.getSyn();
+				int i = 0;
+				for ( String str : syn ) {
 					if ( i == 0 )
-						isb.append(syn[0]);
+						isb.append(str);
 					else {
 						isb.append(',');
-						isb.append(syn[i]);
+						isb.append(str);
 					}
+					i++;
 				}
 			}
 			

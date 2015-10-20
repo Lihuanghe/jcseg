@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.lionsoul.jcseg.core.ADictionary;
@@ -298,8 +299,8 @@ public abstract class ASegment implements ISegment {
 									&& config.LOAD_CJK_SYN && w.getSyn() != null ) 
 							{
 								IWord wd;
-								for ( int j = 0; j < w.getSyn().length; j++ ) {
-									wd = new Word(w.getSyn()[j], w.getType());
+								for ( String synstr : w.getSyn() ) {
+									wd = new Word(synstr, w.getType());
 									wd.setPartSpeech(w.getPartSpeech());
 									wd.setPosition(w.getPosition());
 									wordPool.add(wd);
@@ -436,14 +437,14 @@ public abstract class ASegment implements ISegment {
 					}
 					
 					//add the syn words to the pool
-					String[] syns = null;
+					HashSet<String> syns = null;
 					if ( T == -1 && config.LOAD_CJK_SYN && 
 							( syns = w.getSyn() ) != null ) 
 					{
 						IWord wd;
-						for ( int j = 0; j < syns.length; j++ ) 
+						for (String str : syns ) 
 						{
-							wd = new Word(syns[j], w.getType());
+							wd = new Word(str, w.getType());
 							wd.setPartSpeech(w.getPartSpeech());
 							wd.setPosition(w.getPosition());
 							wordPool.add(wd);
@@ -623,10 +624,10 @@ public abstract class ASegment implements ISegment {
 		if (  ew != null && ew.getSyn() != null ) 
 		{
 			IWord sw = null;
-			String[] syns = ew.getSyn();
-			for ( int j = 0; j < syns.length; j++ ) 
+			HashSet<String> syns = ew.getSyn();
+			for ( String str : syns ) 
 			{
-				sw = new Word(syns[j], w.getType());
+				sw = new Word(str, w.getType());
 				sw.setPartSpeech(w.getPartSpeech());
 				sw.setPosition(w.getPosition());
 				wordPool.add(sw);
